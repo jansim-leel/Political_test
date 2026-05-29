@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나의 정치성향 테스트</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --card: #13131a;
+    --border: #2a2a3a;
+    --accent-left: #e05555;
+    --accent-right: #5578e0;
+    --accent-mid: #55c784;
+    --text: #e8e8f0;
+    --text-dim: #888899;
+    --pixel: 4px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 31px, rgba(255,255,255,0.015) 31px, rgba(255,255,255,0.015) 32px),
+      repeating-linear-gradient(90deg, transparent, transparent 31px, rgba(255,255,255,0.015) 31px, rgba(255,255,255,0.015) 32px);
+  }
+
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 16px; }
+
+  /* ── INTRO ── */
+  #intro { background: radial-gradient(ellipse at 50% 30%, #1a1a2e 0%, var(--bg) 70%); }
+
+  .pixel-title {
+    font-size: clamp(28px, 6vw, 48px);
+    font-weight: 900;
+    letter-spacing: -1px;
+    text-align: center;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .pixel-title span { color: var(--accent-mid); }
+
+  .subtitle {
+    color: var(--text-dim);
+    text-align: center;
+    font-size: 14px;
+    margin-bottom: 40px;
+  }
+
+  .spectrum-bar {
+    display: flex;
+    width: 100%;
+    max-width: 360px;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 40px;
+  }
+  .spectrum-bar div { flex: 1; }
+  .s1{background:#e05555;} .s2{background:#e07755;} .s3{background:#e0b855;}
+  .s4{background:#55c784;} .s5{background:#55aae0;} .s6{background:#5578e0;} .s7{background:#8855e0;}
+
+  .btn-main {
+    background: var(--accent-mid);
+    color: #000;
+    font-weight: 900;
+    font-size: 18px;
+    padding: 16px 48px;
+    border: none;
+    cursor: pointer;
+    image-rendering: pixelated;
+    clip-path: polygon(4px 0%, calc(100% - 4px) 0%, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0% calc(100% - 4px), 0% 4px);
+    transition: transform 0.1s, filter 0.1s;
+    letter-spacing: 1px;
+  }
+  .btn-main:hover { transform: translateY(-2px); filter: brightness(1.15); }
+  .btn-main:active { transform: translateY(1px); }
+
+  /* ── QUESTIONS ── */
+  #questions { background: var(--bg); padding-top: 32px; justify-content: flex-start; }
+
+  .progress-header {
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 24px;
+  }
+  .progress-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .progress-track {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-left), var(--accent-mid), var(--accent-right));
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  .page-title {
+    width: 100%;
+    max-width: 600px;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .question-card {
+    width: 100%;
+    max-width: 600px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 20px;
+    margin-bottom: 16px;
+    position: relative;
+    clip-path: polygon(3px 0%, calc(100% - 3px) 0%, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0% calc(100% - 3px), 0% 3px);
+    animation: fadeUp 0.3s ease forwards;
+    opacity: 0;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number {
+    font-size: 11px;
+    color: var(--accent-mid);
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+  .q-text {
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 18px;
+    font-weight: 700;
+  }
+
+  .likert {
+    display: flex;
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+  .likert-btn {
+    flex: 1;
+    padding: 10px 4px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 11px;
+    cursor: pointer;
+    text-align: center;
+    line-height: 1.3;
+    transition: all 0.15s;
+    clip-path: polygon(2px 0%, calc(100% - 2px) 0%, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0% calc(100% - 2px), 0% 2px);
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .likert-btn:hover { border-color: #555; color: var(--text); background: rgba(255,255,255,0.04); }
+  .likert-btn.selected-1 { background: rgba(224,85,85,0.25); border-color: var(--accent-left); color: #fff; }
+  .likert-btn.selected-2 { background: rgba(224,140,85,0.2); border-color: #e08c55; color: #fff; }
+  .likert-btn.selected-3 { background: rgba(85,199,132,0.2); border-color: var(--accent-mid); color: #fff; }
+  .likert-btn.selected-4 { background: rgba(85,140,224,0.2); border-color: #558ce0; color: #fff; }
+  .likert-btn.selected-5 { background: rgba(85,120,224,0.25); border-color: var(--accent-right); color: #fff; }
+
+  .nav-row {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+    margin-bottom: 40px;
+  }
+  .btn-next {
+    background: var(--text);
+    color: #000;
+    font-weight: 900;
+    font-size: 15px;
+    padding: 12px 36px;
+    border: none;
+    cursor: pointer;
+    clip-path: polygon(3px 0%, calc(100% - 3px) 0%, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0% calc(100% - 3px), 0% 3px);
+    transition: filter 0.1s, transform 0.1s;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+  .btn-next.ready { opacity: 1; pointer-events: all; }
+  .btn-next.ready:hover { filter: brightness(0.85); transform: translateY(-1px); }
+
+  /* ── LOADING ── */
+  #loading {
+    background: radial-gradient(ellipse at 50% 50%, #0e1a0e 0%, var(--bg) 70%);
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .loading-text {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .loading-bar-track {
+    width: 280px;
+    height: 12px;
+    background: var(--border);
+    clip-path: polygon(3px 0%, calc(100% - 3px) 0%, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0% calc(100% - 3px), 0% 3px);
+    overflow: hidden;
+  }
+  .loading-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-left), var(--accent-mid), var(--accent-right));
+    width: 0%;
+    transition: width 0.3s linear;
+  }
+
+  .pixel-dots {
+    display: flex;
+    gap: 10px;
+  }
+  .pixel-dot {
+    width: 10px; height: 10px;
+    background: var(--accent-mid);
+    animation: blink 0.8s ease infinite;
+  }
+  .pixel-dot:nth-child(2) { animation-delay: 0.2s; }
+  .pixel-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.1} }
+
+  /* ── RESULT ── */
+  #result {
+    background: var(--bg);
+    justify-content: flex-start;
+    padding-top: 40px;
+    gap: 0;
+  }
+
+  .result-inner {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .result-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .result-stage {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 4px 16px;
+    border: 1px solid currentColor;
+    clip-path: polygon(3px 0%, calc(100% - 3px) 0%, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0% calc(100% - 3px), 0% 3px);
+  }
+
+  .result-title {
+    font-size: clamp(32px, 8vw, 52px);
+    font-weight: 900;
+    letter-spacing: -1px;
+    text-align: center;
+    line-height: 1.1;
+  }
+
+  .result-desc {
+    font-size: 14px;
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.8;
+    max-width: 360px;
+  }
+
+  /* Pixel character SVG wrapper */
+  .pixel-char {
+    width: 160px;
+    height: 160px;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 0 20px currentColor);
+  }
+
+  .result-spectrum {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .spectrum-label-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .spectrum-visual {
+    position: relative;
+    height: 12px;
+    background: linear-gradient(90deg, #e05555, #e07755, #e0b855, #55c784, #55aae0, #5578e0, #8855e0);
+    clip-path: polygon(3px 0%, calc(100% - 3px) 0%, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0% calc(100% - 3px), 0% 3px);
+  }
+  .spectrum-marker {
+    position: absolute;
+    top: -6px;
+    width: 6px;
+    height: 24px;
+    background: #fff;
+    transform: translateX(-50%);
+    transition: left 0.5s ease;
+    box-shadow: 0 0 8px rgba(255,255,255,0.8);
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
+  }
+  .btn-secondary {
+    flex: 1;
+    min-width: 120px;
+    padding: 14px 20px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    clip-path: polygon(3px 0%, calc(100% - 3px) 0%, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0% calc(100% - 3px), 0% 3px);
+    transition: background 0.15s;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,0.06); }
+  .btn-share {
+    flex: 1;
+    min-width: 120px;
+    padding: 14px 20px;
+    background: var(--accent-mid);
+    border: none;
+    color: #000;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    clip-path: polygon(3px 0%, calc(100% - 3px) 0%, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0% calc(100% - 3px), 0% 3px);
+    transition: filter 0.15s;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .btn-share:hover { filter: brightness(1.15); }
+
+  /* ── SHARED VIEW ── */
+  #shared {
+    background: var(--bg);
+    flex-direction: column;
+    gap: 24px;
+    padding: 40px 20px;
+  }
+  .shared-banner {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 16px 24px;
+    clip-path: polygon(3px 0%, calc(100% - 3px) 0%, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0% calc(100% - 3px), 0% 3px);
+    font-size: 13px;
+    color: var(--text-dim);
+    text-align: center;
+    max-width: 480px;
+    width: 100%;
+  }
+  .shared-banner strong { color: var(--accent-mid); }
+
+  /* toast */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #fff;
+    color: #000;
+    font-weight: 700;
+    padding: 12px 28px;
+    font-size: 14px;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    clip-path: polygon(3px 0%, calc(100% - 3px) 0%, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0% calc(100% - 3px), 0% 3px);
+    z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ── INTRO ── -->
+<div id="intro" class="screen active">
+  <div class="pixel-title">나의 <span>정치성향</span><br>테스트</div>
+  <div class="subtitle">20개의 질문으로 알아보는 나의 정치적 위치</div>
+  <div class="spectrum-bar">
+    <div class="s1"></div><div class="s2"></div><div class="s3"></div>
+    <div class="s4"></div><div class="s5"></div><div class="s6"></div><div class="s7"></div>
+  </div>
+  <button class="btn-main" onclick="startTest()">테스트 시작하기 ▶</button>
+</div>
+
+<!-- ── QUESTIONS ── -->
+<div id="questions" class="screen">
+  <div class="progress-header">
+    <div class="progress-label">
+      <span id="progress-text">진행도</span>
+      <span id="progress-count">0 / 20</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+  <div class="page-title" id="page-title">PART 1 — 질문 1-5</div>
+  <div id="q-container"></div>
+  <div class="nav-row">
+    <button class="btn-next" id="btn-next" onclick="nextPage()">다음 →</button>
+  </div>
+</div>
+
+<!-- ── LOADING ── -->
+<div id="loading" class="screen">
+  <div class="loading-text">정치성향 계산중...</div>
+  <div class="pixel-dots">
+    <div class="pixel-dot"></div>
+    <div class="pixel-dot"></div>
+    <div class="pixel-dot"></div>
+  </div>
+  <div class="loading-bar-track">
+    <div class="loading-bar-fill" id="loading-fill"></div>
+  </div>
+</div>
+
+<!-- ── RESULT ── -->
+<div id="result" class="screen">
+  <div class="result-inner">
+    <div class="result-label">당신의 정치성향</div>
+    <div class="result-stage" id="r-stage"></div>
+    <svg class="pixel-char" id="r-char" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="result-title" id="r-title"></div>
+    <div class="result-desc" id="r-desc"></div>
+    <div class="result-spectrum">
+      <div class="spectrum-label-row"><span>← 진보</span><span>보수 →</span></div>
+      <div class="spectrum-visual"><div class="spectrum-marker" id="r-marker"></div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="restartTest()">↺ 다시하기</button>
+      <button class="btn-share" onclick="shareResult()">📤 링크 공유하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SHARED VIEW ── -->
+<div id="shared" class="screen">
+  <div class="result-inner" id="shared-inner">
+    <div class="shared-banner">친구가 공유한 결과예요!</div>
+  </div>
+  <button class="btn-main" onclick="startTest()" style="margin-top:8px">나도 테스트 하기 ▶</button>
+</div>
+
+<div class="toast" id="toast">링크가 복사되었습니다!</div>
+
+<script>
+// ──────────────────────────────────────────────
+// DATA
+// ──────────────────────────────────────────────
+// dir: "prog" = 동의할수록 진보 / "cons" = 동의할수록 보수
+// 진보 10개 + 보수 10개, 섞어서 배치
+const QUESTIONS = [
+  { id:1,  text:"국가는 고소득자에게 더 높은 세율을 적용해 소득 불평등을 줄여야 한다.", dir:"prog" },
+  { id:2,  text:"기업 규제를 줄여야 경제가 더 활성화되고 일자리도 늘어난다.", dir:"cons" },
+  { id:3,  text:"동성 커플도 법적으로 혼인에 준하는 권리를 보장받아야 한다.", dir:"prog" },
+  { id:4,  text:"전통적 가족 제도는 사회 안정의 핵심이므로 법적으로 보호해야 한다.", dir:"cons" },
+  { id:5,  text:"최저임금을 지속적으로 인상해 노동자의 생활 수준을 높여야 한다.", dir:"prog" },
+  { id:6,  text:"복지 지출 확대보다 재정 건전성 유지가 더 중요하다.", dir:"cons" },
+  { id:7,  text:"의료는 공공재이므로 국가가 더 많은 책임을 져야 한다.", dir:"prog" },
+  { id:8,  text:"안보를 위해 국방 예산을 늘리는 것은 당연히 필요하다.", dir:"cons" },
+  { id:9,  text:"난민과 이주민에 대한 사회적 수용을 점진적으로 확대해야 한다.", dir:"prog" },
+  { id:10, text:"이민자 유입은 국내 일자리와 사회 질서에 부정적 영향을 줄 수 있다.", dir:"cons" },
+  { id:11, text:"탄소 감축을 위해 기업에 강력한 환경 규제를 적용해야 한다.", dir:"prog" },
+  { id:12, text:"경제 성장을 위해 환경 규제를 일부 완화하는 것도 고려해야 한다.", dir:"cons" },
+  { id:13, text:"비정규직의 정규직 전환을 위한 정부의 정책적 개입이 필요하다.", dir:"prog" },
+  { id:14, text:"노동 시장의 유연성을 높이는 것이 장기적으로 고용에 더 좋다.", dir:"cons" },
+  { id:15, text:"적극적 차별 해소 정책(여성·장애인 할당제 등)이 필요하다.", dir:"prog" },
+  { id:16, text:"개인의 성공과 실패는 제도보다 본인의 노력과 능력에 달려 있다.", dir:"cons" },
+  { id:17, text:"공교육 투자를 늘려 교육 기회의 격차를 줄여야 한다.", dir:"prog" },
+  { id:18, text:"사립학교와 민간 교육기관이 늘어날수록 교육의 질이 올라간다.", dir:"cons" },
+  { id:19, text:"사형제는 폐지하고 인권 중심의 교정 제도로 전환해야 한다.", dir:"prog" },
+  { id:20, text:"강력 범죄에 대한 처벌을 더 강화해 사회 질서를 바로잡아야 한다.", dir:"cons" },
+];
+
+const RESULTS = [
+  { id:1, stage:"좌파 3단계", title:"혁명가", color:"#e05555",
+    desc:"사회 구조의 근본적 변화를 열망합니다.\n평등과 연대를 최고의 가치로 삼으며,\n기존 질서에 강한 문제의식을 갖고 있습니다.",
+    markerPct: 7 },
+  { id:2, stage:"좌파 2단계", title:"진보주의자", color:"#e07755",
+    desc:"복지 확대와 사회적 약자 보호를 중시합니다.\n국가의 적극적 역할을 통한 불평등 해소를\n중요한 과제로 생각합니다.",
+    markerPct: 21 },
+  { id:3, stage:"좌파 1단계", title:"개혁파", color:"#e0b855",
+    desc:"점진적인 개혁을 통한 변화를 추구합니다.\n현실을 인정하면서도 더 나은 방향을\n모색하는 실용적 진보주의자입니다.",
+    markerPct: 35 },
+  { id:4, stage:"중도", title:"중도주의자", color:"#55c784",
+    desc:"좌와 우의 균형을 추구합니다.\n이념보다 실용을 우선시하며\n다양한 입장을 존중하려 합니다.",
+    markerPct: 50 },
+  { id:5, stage:"우파 1단계", title:"보수개혁파", color:"#55aae0",
+    desc:"전통 가치를 존중하면서도 변화를 수용합니다.\n시장 경제를 기반으로 하되\n사회적 책임도 중요시합니다.",
+    markerPct: 64 },
+  { id:6, stage:"우파 2단계", title:"보수주의자", color:"#5578e0",
+    desc:"검증된 질서와 안정을 선호합니다.\n자유 시장과 개인 책임을 중시하며\n전통적 가치관을 지향합니다.",
+    markerPct: 78 },
+  { id:7, stage:"우파 3단계", title:"전통수호자", color:"#8855e0",
+    desc:"오랜 전통과 확립된 질서를 굳게 지킵니다.\n급격한 변화보다 안정과 계승을\n최우선 가치로 여깁니다.",
+    markerPct: 93 },
+];
+
+// Pixel art characters (SVG paths) for each result type
+const PIXEL_CHARS = [
+  // 1: 혁명가 - red beret, fist raised
+  `<rect x="16" y="2" width="8" height="2" fill="#e05555"/>
+   <rect x="14" y="4" width="12" height="2" fill="#e05555"/>
+   <rect x="15" y="6" width="10" height="6" fill="#f5c5a0"/>
+   <rect x="14" y="8" width="2" height="4" fill="#f5c5a0"/>
+   <rect x="24" y="8" width="2" height="4" fill="#f5c5a0"/>
+   <rect x="15" y="10" width="2" height="2" fill="#333"/>
+   <rect x="23" y="10" width="2" height="2" fill="#333"/>
+   <rect x="17" y="13" width="6" height="1" fill="#c0785a"/>
+   <rect x="14" y="14" width="12" height="10" fill="#cc2200"/>
+   <rect x="12" y="16" width="4" height="6" fill="#cc2200"/>
+   <rect x="24" y="14" width="4" height="4" fill="#cc2200"/>
+   <rect x="24" y="14" width="4" height="2" fill="#f5c5a0"/>
+   <rect x="24" y="12" width="4" height="2" fill="#f5c5a0"/>
+   <rect x="26" y="10" width="2" height="2" fill="#f5c5a0"/>
+   <rect x="16" y="24" width="4" height="10" fill="#333"/>
+   <rect x="20" y="24" width="4" height="10" fill="#222"/>
+   <rect x="14" y="32" width="6" height="4" fill="#555"/>
+   <rect x="20" y="32" width="6" height="4" fill="#444"/>`,
+
+  // 2: 진보주의자 - glasses, green scarf
+  `<rect x="15" y="4" width="10" height="8" fill="#f5c5a0"/>
+   <rect x="14" y="6" width="2" height="4" fill="#f5c5a0"/>
+   <rect x="24" y="6" width="2" height="4" fill="#f5c5a0"/>
+   <rect x="15" y="8" width="3" height="2" fill="#55c784"/>
+   <rect x="22" y="8" width="3" height="2" fill="#55c784"/>
+   <rect x="18" y="8" width="4" height="1" fill="#55c784"/>
+   <rect x="17" y="11" width="6" height="1" fill="#c0785a"/>
+   <rect x="13" y="14" width="14" height="12" fill="#2d5a3d"/>
+   <rect x="12" y="14" width="2" height="8" fill="#55c784"/>
+   <rect x="26" y="14" width="2" height="8" fill="#55c784"/>
+   <rect x="13" y="14" width="14" height="3" fill="#55c784"/>
+   <rect x="11" y="15" width="2" height="6" fill="#2d5a3d"/>
+   <rect x="27" y="15" width="2" height="6" fill="#2d5a3d"/>
+   <rect x="16" y="26" width="4" height="10" fill="#333"/>
+   <rect x="20" y="26" width="4" height="10" fill="#444"/>
+   <rect x="14" y="34" width="6" height="2" fill="#555"/>
+   <rect x="20" y="34" width="6" height="2" fill="#666"/>`,
+
+  // 3: 개혁파 - casual, warm
+  `<rect x="15" y="4" width="10" height="8" fill="#f5c5a0"/>
+   <rect x="14" y="6" width="2" height="4" fill="#f5c5a0"/>
+   <rect x="24" y="6" width="2" height="4" fill="#f5c5a0"/>
+   <rect x="15" y="8" width="2" height="2" fill="#333"/>
+   <rect x="23" y="8" width="2" height="2" fill="#333"/>
+   <rect x="17" y="11" width="6" height="1" fill="#c0785a"/>
+   <rect x="14" y="12" width="12" height="14" fill="#e0b855"/>
+   <rect x="12" y="14" width="4" height="8" fill="#e0b855"/>
+   <rect x="24" y="14" width="4" height="8" fill="#e0b855"/>
+   <rect x="14" y="4" width="12" height="2" fill="#8B4513"/>
+   <rect x="13" y="6" width="14" height="2" fill="#8B4513"/>
+   <rect x="16" y="26" width="4" height="10" fill="#555"/>
+   <rect x="20" y="26" width="4" height="10" fill="#444"/>
+   <rect x="14" y="34" width="6" height="2" fill="#333"/>
+   <rect x="20" y="34" width="6" height="2" fill="#333"/>`,
+
+  // 4: 중도주의자 - neat, balanced
+  `<rect x="15" y="4" width="10" height="8" fill="#f5c5a0"/>
+   <rect x="14" y="6" width="2" height="4" fill="#f5c5a0"/>
+   <rect x="24" y="6" width="2" height="4" fill="#f5c5a0"/>
+   <rect x="15" y="8" width="2" height="2" fill="#333"/>
+   <rect x="23" y="8" width="2" height="2" fill="#333"/>
+   <rect x="17" y="11" width="6" height="1" fill="#c0785a"/>
+   <rect x="14" y="12" width="12" height="14" fill="#7a9cc0"/>
+   <rect x="18" y="12" width="4" height="14" fill="#fff"/>
+   <rect x="12" y="14" width="4" height="8" fill="#7a9cc0"/>
+   <rect x="24" y="14" width="4" height="8" fill="#7a9cc0"/>
+   <rect x="14" y="4" width="12" height="2" fill="#555"/>
+   <rect x="16" y="26" width="4" height="10" fill="#333"/>
+   <rect x="20" y="26" width="4" height="10" fill="#444"/>
+   <rect x="14" y="34" width="6" height="2" fill="#7a9cc0"/>
+   <rect x="20" y="34" width="6" height="2" fill="#7a9cc0"/>`,
+
+  // 5: 보수개혁파 - business casual
+  `<rect x="15" y="4" width="10" height="8" fill="#f5c5a0"/>
+   <rect x="14" y="6" width="2" height="4" fill="#f5c5a0"/>
+   <rect x="24" y="6" width="2" height="4" fill="#f5c5a0"/>
+   <rect x="15" y="8" width="2" height="2" fill="#333"/>
+   <rect x="23" y="8" width="2" height="2" fill="#333"/>
+   <rect x="17" y="11" width="6" height="1" fill="#c0785a"/>
+   <rect x="14" y="12" width="12" height="14" fill="#2a5298"/>
+   <rect x="18" y="12" width="4" height="4" fill="#fff"/>
+   <rect x="19" y="12" width="2" height="8" fill="#e05555"/>
+   <rect x="12" y="14" width="4" height="8" fill="#2a5298"/>
+   <rect x="24" y="14" width="4" height="8" fill="#2a5298"/>
+   <rect x="14" y="4" width="12" height="2" fill="#555"/>
+   <rect x="16" y="26" width="4" height="10" fill="#1a1a1a"/>
+   <rect x="20" y="26" width="4" height="10" fill="#222"/>
+   <rect x="14" y="34" width="6" height="2" fill="#2a5298"/>
+   <rect x="20" y="34" width="6" height="2" fill="#2a5298"/>`,
+
+  // 6: 보수주의자 - formal suit
+  `<rect x="15" y="4" width="10" height="8" fill="#f5c5a0"/>
+   <rect x="14" y="6" width="2" height="4" fill="#f5c5a0"/>
+   <rect x="24" y="6" width="2" height="4" fill="#f5c5a0"/>
+   <rect x="15" y="8" width="2" height="2" fill="#333"/>
+   <rect x="23" y="8" width="2" height="2" fill="#333"/>
+   <rect x="17" y="11" width="6" height="1" fill="#c0785a"/>
+   <rect x="14" y="12" width="12" height="14" fill="#1a1a2e"/>
+   <rect x="18" y="12" width="4" height="4" fill="#eee"/>
+   <rect x="19" y="12" width="2" height="10" fill="#8855e0"/>
+   <rect x="12" y="14" width="4" height="8" fill="#1a1a2e"/>
+   <rect x="24" y="14" width="4" height="8" fill="#1a1a2e"/>
+   <rect x="14" y="4" width="12" height="2" fill="#333"/>
+   <rect x="13" y="6" width="14" height="2" fill="#2a2a2a"/>
+   <rect x="16" y="26" width="4" height="10" fill="#0a0a0a"/>
+   <rect x="20" y="26" width="4" height="10" fill="#111"/>
+   <rect x="14" y="34" width="6" height="2" fill="#222"/>
+   <rect x="20" y="34" width="6" height="2" fill="#222"/>`,
+
+  // 7: 전통수호자 - traditional
+  `<rect x="15" y="2" width="10" height="4" fill="#1a1a2e"/>
+   <rect x="13" y="6" width="14" height="2" fill="#1a1a2e"/>
+   <rect x="15" y="6" width="10" height="8" fill="#f5c5a0"/>
+   <rect x="14" y="8" width="2" height="4" fill="#f5c5a0"/>
+   <rect x="24" y="8" width="2" height="4" fill="#f5c5a0"/>
+   <rect x="15" y="10" width="2" height="2" fill="#333"/>
+   <rect x="23" y="10" width="2" height="2" fill="#333"/>
+   <rect x="17" y="13" width="6" height="1" fill="#c0785a"/>
+   <rect x="14" y="14" width="12" height="12" fill="#4a3728"/>
+   <rect x="16" y="14" width="8" height="2" fill="#6a5748"/>
+   <rect x="12" y="16" width="4" height="8" fill="#4a3728"/>
+   <rect x="24" y="16" width="4" height="8" fill="#4a3728"/>
+   <rect x="16" y="26" width="4" height="10" fill="#2a1a0e"/>
+   <rect x="20" y="26" width="4" height="10" fill="#1a0e08"/>
+   <rect x="13" y="32" width="7" height="4" fill="#4a3728"/>
+   <rect x="20" y="32" width="7" height="4" fill="#3a2718"/>`,
+];
+
+// ──────────────────────────────────────────────
+// STATE
+// ──────────────────────────────────────────────
+let answers = {};
+let currentPage = 0;
+let finalScore = null;
+
+// ──────────────────────────────────────────────
+// SCORING
+// The questions are all "progressive-leaning" or "moderate"
+// A "strongly agree" with a progressive question = very progressive
+// A "strongly disagree" = more conservative
+// prog 질문: 동의(1)=진보, 반대(5)=보수
+// cons 질문: 동의(1)=보수 → (6-value)로 반전해서 진보 방향 통일
+// 총점 20(최진보) ~ 100(최보수) → 7단계 매핑
+// ──────────────────────────────────────────────
+function calcScore() {
+  // prog: 동의(1)=진보(낮은점수), cons: 동의(1)=보수이므로 반전
+  // 총점 20(최진보) ~ 100(최보수)
+  let total = 0;
+  for (let i = 0; i < QUESTIONS.length; i++) {
+    const raw = answers[i] || 3;
+    const q = QUESTIONS[i];
+    total += q.dir === "cons" ? (6 - raw) : raw;
+  }
+  return total;
+}
+
+function scoreToResult(score) {
+  const pct = (score - 20) / 80;
+  const idx = Math.min(6, Math.floor(pct * 7));
+  return RESULTS[idx];
+}
+
+// ──────────────────────────────────────────────
+// SCREENS
+// ──────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startTest() {
+  answers = {};
+  currentPage = 0;
+  renderPage(0);
+  showScreen('questions');
+}
+
+function restartTest() {
+  startTest();
+}
+
+// ──────────────────────────────────────────────
+// QUESTION RENDERING
+// ──────────────────────────────────────────────
+const LIKERT_LABELS = ["매우\n동의", "동의", "보통", "반대", "매우\n반대"];
+
+function renderPage(page) {
+  const start = page * 5;
+  const end = start + 5;
+  const pageQs = QUESTIONS.slice(start, end);
+
+  document.getElementById('page-title').textContent = `PART ${page + 1} — 질문 ${start + 1}-${end}`;
+
+  const answered = Object.keys(answers).filter(k => k >= start && k < end).length;
+  updateProgress(Object.keys(answers).length);
+
+  const container = document.getElementById('q-container');
+  container.innerHTML = '';
+
+  pageQs.forEach((q, i) => {
+    const globalIdx = start + i;
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.style.animationDelay = `${i * 0.07}s`;
+
+    const selectedVal = answers[globalIdx];
+    const likertBtns = LIKERT_LABELS.map((label, li) => {
+      const sel = selectedVal === (li + 1) ? `selected-${li + 1}` : '';
+      return `<button class="likert-btn ${sel}" onclick="selectAnswer(${globalIdx}, ${li + 1}, this, event)">${label}</button>`;
+    }).join('');
+
+    card.innerHTML = `
+      <div class="q-number">Q${globalIdx + 1} / 20</div>
+      <div class="q-text">${q.text}</div>
+      <div class="likert">${likertBtns}</div>
+    `;
+    container.appendChild(card);
+  });
+
+  checkPageComplete(page);
+}
+
+function selectAnswer(qIdx, value, btn, e) {
+  answers[qIdx] = value;
+  // reset siblings
+  const likert = btn.closest('.likert');
+  likert.querySelectorAll('.likert-btn').forEach((b, i) => {
+    b.className = 'likert-btn';
+  });
+  btn.classList.add(`selected-${value}`);
+  checkPageComplete(currentPage);
+  updateProgress(Object.keys(answers).length);
+}
+
+function checkPageComplete(page) {
+  const start = page * 5;
+  let allAnswered = true;
+  for (let i = start; i < start + 5; i++) {
+    if (answers[i] === undefined) { allAnswered = false; break; }
+  }
+  const btn = document.getElementById('btn-next');
+  if (allAnswered) btn.classList.add('ready');
+  else btn.classList.remove('ready');
+}
+
+function updateProgress(count) {
+  document.getElementById('progress-count').textContent = `${count} / 20`;
+  document.getElementById('progress-fill').style.width = `${(count / 20) * 100}%`;
+}
+
+function nextPage() {
+  const start = currentPage * 5;
+  for (let i = start; i < start + 5; i++) {
+    if (answers[i] === undefined) return;
+  }
+  currentPage++;
+  if (currentPage >= 4) {
+    showLoading();
+  } else {
+    renderPage(currentPage);
+    window.scrollTo(0, 0);
+  }
+}
+
+// ──────────────────────────────────────────────
+// LOADING
+// ──────────────────────────────────────────────
+function showLoading() {
+  showScreen('loading');
+  finalScore = calcScore();
+  const fill = document.getElementById('loading-fill');
+  let pct = 0;
+  const interval = setInterval(() => {
+    pct += 2;
+    fill.style.width = pct + '%';
+    if (pct >= 100) {
+      clearInterval(interval);
+      setTimeout(showResult, 400);
+    }
+  }, 80); // ~4s total + 0.4s delay ≈ 5s
+}
+
+// ──────────────────────────────────────────────
+// RESULT
+// ──────────────────────────────────────────────
+function showResult(resultData) {
+  const res = resultData || scoreToResult(finalScore);
+  const idx = RESULTS.indexOf(res) !== -1 ? RESULTS.indexOf(res) : RESULTS.findIndex(r => r.id === res.id);
+
+  document.getElementById('r-stage').textContent = res.stage;
+  document.getElementById('r-stage').style.color = res.color;
+  document.getElementById('r-stage').style.borderColor = res.color;
+  document.getElementById('r-title').textContent = res.title;
+  document.getElementById('r-title').style.color = res.color;
+  document.getElementById('r-desc').textContent = res.desc.replace(/\n/g, '\n');
+
+  const charSvg = document.getElementById('r-char');
+  charSvg.innerHTML = PIXEL_CHARS[idx] || PIXEL_CHARS[3];
+  charSvg.style.color = res.color;
+  charSvg.style.filter = `drop-shadow(0 0 16px ${res.color}88)`;
+
+  document.getElementById('r-marker').style.left = res.markerPct + '%';
+
+  showScreen('result');
+}
+
+// ──────────────────────────────────────────────
+// SHARE
+// ──────────────────────────────────────────────
+function shareResult() {
+  const res = scoreToResult(finalScore);
+  const url = new URL(window.location.href.split('?')[0]);
+  url.searchParams.set('shared', '1');
+  url.searchParams.set('rid', res.id);
+  url.searchParams.set('title', res.title);
+  url.searchParams.set('stage', res.stage);
+
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url.toString()).then(() => showToast());
+  } else {
+    prompt('링크를 복사하세요:', url.toString());
+  }
+}
+
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ──────────────────────────────────────────────
+// SHARED VIEW
+// ──────────────────────────────────────────────
+function initSharedView(params) {
+  const rid = parseInt(params.get('rid'));
+  const res = RESULTS.find(r => r.id === rid) || RESULTS[3];
+  const idx = RESULTS.indexOf(res);
+
+  const inner = document.getElementById('shared-inner');
+  inner.innerHTML = `
+    <div class="shared-banner">친구가 공유한 테스트 결과예요! 👀</div>
+    <div class="result-label">테스트 결과</div>
+    <div class="result-stage" style="color:${res.color}; border-color:${res.color}">${res.stage}</div>
+    <svg class="pixel-char" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"
+      style="color:${res.color}; filter:drop-shadow(0 0 16px ${res.color}88)">
+      ${PIXEL_CHARS[idx]}
+    </svg>
+    <div class="result-title" style="color:${res.color}">${res.title}</div>
+    <div class="result-desc">${res.desc.replace(/\n/g, '<br>')}</div>
+    <div class="result-spectrum">
+      <div class="spectrum-label-row"><span>← 진보</span><span>보수 →</span></div>
+      <div class="spectrum-visual">
+        <div class="spectrum-marker" style="left:${res.markerPct}%"></div>
+      </div>
+    </div>
+  `;
+  showScreen('shared');
+}
+
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('shared') === '1') {
+    initSharedView(params);
+  } else {
+    showScreen('intro');
+  }
+});
+</script>
+</body>
+</html>
