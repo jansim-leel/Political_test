@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>정치성향 테스트 2026</title>
 
-<!-- OG / 카카오톡 미리보기 -->
+<!-- OG / 카카오톡 미리보기 (이미지 주소 인코딩 버그 수정) -->
 <meta property="og:title" content="🗳️ 정치성향 테스트 2026">
 <meta property="og:description" content="나는 좌파? 우파? 중도? 20개 질문으로 알아보는 내 정치 성향">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://og-image-gen.vercel.app/api/og?title=%EC%A0%95%EC%B9%98%EC%84%B1%ED%96%A5+%ED%85%8C%EC%8A%A4%ED%8A%B8+2026&desc=%EB%82%98%EB%8A%94+%EC%A2%8C%ED%8C%8C%3F+%EC%9A%B0%ED%8C%8C%3F+20%EA%B0%9C+%EC%A7%88%EB%AC%B8%EC%9C%BC%EB%A1%9C+%EC%95%8C%EC%95%84%EB%B3%B4%EC%9E%90">
+<meta property="og:image" content="https://og-image-gen.vercel.app/api/og?title=%EC%A0%95%EC%B9%98%EC%84%B1%ED%96%A5+%ED%85%8C%EC%8A%A4%ED%8A%B8+2026&desc=%EB%82%98%EB%8A%94%20%EC%A2%8C%ED%8C%8C%3F%20%EC%9A%B0%ED%8C%8C%3F%20%EC%A4%91%EB%8F%84%3F%2020%EA%B0%9C%20%EC%A7%88%EB%AC%B8%EC%9C%BC%EB%A1%9C%20%EC%95%8C%EC%95%84%EB%B3%B4%EB%8A%94%20%EB%82%B4%20%EC%A0%95%EC%B9%98%20%EC%84%B1%ED%96%A5">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -506,18 +506,18 @@ body {
       <rect x="15" y="4" width="10" height="8" fill="#f5c5a0"/>
       <rect x="14" y="6" width="2" height="4" fill="#f5c5a0"/>
       <rect x="24" y="6" width="2" height="4" fill="#f5c5a0"/>
-      <rect x="15" y="8" width="2" height="2" fill="#333"/>
-      <rect x="23" y="8" width="2" height="2" fill="#333"/>
+      <rect x="15" y="8" width="3" height="2" fill="#2ab56e"/>
+      <rect x="22" y="8" width="3" height="2" fill="#2ab56e"/>
+      <rect x="18" y="8" width="4" height="1" fill="#2ab56e"/>
       <rect x="17" y="11" width="6" height="1" fill="#c0785a"/>
-      <rect x="14" y="12" width="12" height="14" fill="#7a9cc0"/>
-      <rect x="18" y="12" width="4" height="14" fill="#fff"/>
-      <rect x="12" y="14" width="4" height="8" fill="#7a9cc0"/>
-      <rect x="24" y="14" width="4" height="8" fill="#7a9cc0"/>
-      <rect x="14" y="4" width="12" height="2" fill="#555"/>
+      <rect x="13" y="14" width="14" height="12" fill="#2d5a3d"/>
+      <rect x="12" y="14" width="2" height="8" fill="#2ab56e"/>
+      <rect x="26" y="14" width="2" height="8" fill="#2ab56e"/>
+      <rect x="13" y="14" width="14" height="3" fill="#2ab56e"/>
       <rect x="16" y="26" width="4" height="10" fill="#333"/>
       <rect x="20" y="26" width="4" height="10" fill="#444"/>
-      <rect x="14" y="34" width="6" height="2" fill="#7a9cc0"/>
-      <rect x="20" y="34" width="6" height="2" fill="#7a9cc0"/>
+      <rect x="14" y="34" width="6" height="2" fill="#555"/>
+      <rect x="20" y="34" width="6" height="2" fill="#666"/>
     </svg>
     <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
       <rect x="15" y="2" width="10" height="4" fill="#1a1a2e"/>
@@ -618,7 +618,7 @@ const QUESTIONS = [
   { id:6,  text:"복지 지출 확대보다 재정 건전성 유지가 더 중요하다.", dir:"cons" },
   { id:7,  text:"의료는 공공재이므로 국가가 더 많은 책임을 져야 한다.", dir:"prog" },
   { id:8,  text:"안보를 위해 국방 예산을 늘리는 것은 당연히 필요하다.", dir:"cons" },
-  { id:9,  text:"난민과 이주민에 대한 사회적 수용을 점진적으로 확대해야 한다.", dir:"prog" },
+  { id:9,  text:"난민 and 이주민에 대한 사회적 수용을 점진적으로 확대해야 한다.", dir:"prog" },
   { id:10, text:"이민자 유입은 국내 일자리와 사회 질서에 부정적 영향을 줄 수 있다.", dir:"cons" },
   { id:11, text:"탄소 감축을 위해 기업에 강력한 환경 규제를 적용해야 한다.", dir:"prog" },
   { id:12, text:"경제 성장을 위해 환경 규제를 일부 완화하는 것도 고려해야 한다.", dir:"cons" },
@@ -852,7 +852,10 @@ function nextPage() {
   if (![0,1,2,3,4].every(i => answers[start+i] !== undefined)) return;
   currentPage++;
   if (currentPage >= 4) showLoading();
-  else { renderPage(currentPage); }
+  else { 
+    renderPage(currentPage); 
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // 다음 페이지 이동 시 스크롤 최상단 리셋 코드 추가
+  }
 }
 
 // ── LOADING ───────────────────────────────────
